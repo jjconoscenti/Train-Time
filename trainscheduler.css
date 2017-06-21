@@ -1,0 +1,21 @@
+.jumbotron {
+    background-color:transparent !important;
+    font-family: 'Roboto', sans-serif;
+}
+
+.panel-title {
+	font-family: 'Roboto', sans-serif;
+}
+
+.table {
+	font-family: 'Roboto', sans-serif;
+}
+
+.form-group {
+	font-family: 'Roboto', sans-serif;
+}
+
+#submitBtn:hover {
+	background-color: orange;
+	color: white;
+}
