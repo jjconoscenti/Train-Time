@@ -54,7 +54,7 @@ var nextArrivingTrain = moment().add(minutesAway, "minutes");
 var nextTrain = moment(nextArrivingTrain).format("hh:mma");
   console.log('Next Train Arrives at: ${nextTrain}');
 
-// ensure user entry then push to database
+// input validation then push to database
   
   if (trainName !== '' && destination !== '' && trainTime !== '' && frequency !== '') {
     database.ref().push({
