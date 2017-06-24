@@ -15,92 +15,65 @@ firebase.initializeApp(config);
 var database = firebase.database();
 
 // global variables
-var trainName;
-var destination; 
-var trainTime;
-var frequency;
+// NONE... well not really
 
 // gather user input
-$('submitBtn').on('click', function(e) {
+$('#submitBtn').on('click', function(e) {
   e.preventDefault();
 
-  trainName = $('#trainName').val();
+  var trainName = $('#trainName').val();
   $('trainName').val('');
 
-  destination = $('#trainDestination').val();
+  var destination = $('#trainDestination').val();
   $('trainDestination').val('');
 
-  trainTime = $('#trainTime').val();
+  var trainTime = $('#trainTime').val();
   $('trainTime').val('');
 
-  frequency = $('#trainFrequency').val();
+  var frequency = $('#trainFrequency').val();
   $('trainFrequency').val('');
+
+  addItem(trainName,destination,trainTime,frequency);
 })
 
-var convertedTime = moment(trainTime, 'hh:mm').subtract(1, 'years');
-  console.log(convertedTime);
+database.ref().on('child_added', function(childSnapshot) {
+  var sv = childSnapshot.val();
+  console.log(sv);
+  var convertedTime = moment(sv.trainTime, 'hh:mm').subtract(1, 'years');
+    console.log(convertedTime);
 
-var timeBetween = moment().diff(moment(convertedTime), "minutes");
-  console.log('Time between: ${timeBetween}');
+  var timeDifference = moment().diff(moment(convertedTime), "minutes");
+      console.log(timeDifference);
 
-var timeRemaining = timeBetween % frequency;
-  console.log(timeRemaining);
+  var timeRemaining = timeDifference % sv.frequency;
+    console.log(timeRemaining);
 
-var minutesAway = frequency - timeRemaining;
-  console.log('Minutes away: ${minutesAway}');
+  var minutesAway = sv.frequency - timeRemaining;
+    console.log(minutesAway);
 
-var nextArrivingTrain = moment().add(minutesAway, "minutes");
+  var nextArrivingTrain = moment().add(minutesAway, "minutesAway");
+  var nextTrain = moment(nextArrivingTrain).format("hh:mma");
+  console.log(nextTrain);
 
-var nextTrain = moment(nextArrivingTrain).format("hh:mma");
-  console.log('Next Train Arrives at: ${nextTrain}');
+  renderItem(sv.trainName, sv.destination, sv.frequency, nextArrivingTrain, minutesAway);
+});
 
-// input validation then push to database
-  
-  if (trainName !== '' && destination !== '' && trainTime !== '' && frequency !== '') {
+function addItem (trainName,destination,trainTime,frequency) {
+  if (trainName && destination && trainTime && frequency) {
     database.ref().push({
       trainName: trainName,
       destination: destination,
       frequency: frequency,
-      trainTime: trainTime,
-      minutesAway: minutesAway,
-      nextTrain: nextTrain
+      trainTime: trainTime
     });
   } else {
       alert('ENTER INFORMATION PLEASE');
   };
+}
 
-database.ref().on('child_added', function(childSnapshot) {
-  var sv = childSnapshot.val();
-
-  convertedTime = moment(sv.trainTime, 'hh:mm').subtract(1, 'years');
-    console.log(convertedTime);
-
-  timeDifference = moment().diff(moment(convertedTime), "minutes");
-      console.log(timeDifference);
-
-  timeRemaining = timeDifference % sv.frequency;
-    console.log(timeRemaining);
-
-  minutesAway = sv.frequency - timeRemaining;
-    console.log(minutesAway);
-
-  nextArrivingTrain = moment().add(minutesAway, "minutesAway");
-  nextTrain = moment(nextArrivingTrain).format("hh:mma");
-    console.log(nextTrain);
-
-  $('.table').append('<tbody><tr><td class="tableData">${sv.trainTime}</td><td class="tableData>${sv.destination}</td><td class="tableData">${sv.frequency}</td><td class="tableData">${nextTrain}</td><td class="tableData">${minutesAway}</td></tbody>');
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+function renderItem (trainName,destination,frequency,nextArrival,minutesAway) {
+  var row = [trainName,destination,frequency,nextArrival,minutesAway].map(function (val) {
+    return '<td>' + val + '</td>'
+  }).join('');
+  $('#trainTable').append('<tr>'+row+'</tr>');
+}
